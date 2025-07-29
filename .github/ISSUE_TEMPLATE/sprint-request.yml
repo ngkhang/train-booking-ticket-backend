@@ -1,0 +1,63 @@
+name: Sprint Planning
+description: Create and track sprint development goals and tasks
+title: '[Sprint XX]: '
+labels: ['sprint']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎯 Sprint Planning & Tracking
+
+        Define sprint objectives, deliverables, and acceptance criteria for development team execution.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Sprint Goal
+      description: One-line sprint objective - what are we achieving?
+      placeholder: Implement secure user authentication system
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Technical approach and implementation strategy
+      placeholder: |
+        - Implement JWT-based authentication
+        - Create login/logout API endpoints
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Business Priority
+      description: Sprint importance level
+      options:
+        - Critical (Blocking)
+        - High (Major improvement)
+        - Medium (Enhancement)
+        - Low (Nice to have)
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Measurable sprint completion requirements
+      placeholder: |
+        - [ ] AC-001 - User can login with email/password
+        - [ ] AC-002 - API documentation updated
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Related issues, mockups, examples
+    validations:
+      required: false

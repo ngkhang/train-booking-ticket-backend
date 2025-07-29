@@ -1,0 +1,69 @@
+name: Bug Report
+description: Report a defect to help us improve the application quality
+title: '[Bug]: '
+labels: ['bug', 'triage']
+assignees:
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to file this bug report. Your feedback helps us improve the application quality.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Brief description of the issue
+      placeholder: API returns 500 error when creating resources via POST /api/v1/resources
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: Provide specific steps to reproduce the issue.
+      placeholder: |
+        1. POST to /api/v1/resources with payload {...}
+        2. Include auth header
+        3. Observe 500 error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Result
+      description: Describe what you expected to happen.
+      placeholder: Should return 201 Created with resource ID
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Impact
+      description: How severely does this bug impact functionality?
+      options:
+        - Critical (System down, data loss)
+        - Major (Feature broken)
+        - Minor (Cosmetic/inconvenience)
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Errors
+      description: Include relevant logs (sanitize sensitive data)
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Screenshots, environment details, related issues
+    validations:
+      required: false

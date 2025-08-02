@@ -6,6 +6,8 @@ import {
   UseInterceptors,
   BadRequestException,
   UploadedFiles,
+  Get,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -13,6 +15,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { storage, storeUploadFile } from './oss';
 import * as path from 'path';
+import * as fs from 'fs';
 
 @Controller('user')
 export class UserController {
@@ -60,5 +63,67 @@ export class UserController {
   )
   uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
     return files.map((file) => file.path);
+  }
+
+  @Post('upload/large-file')
+  @UseInterceptors(
+    FilesInterceptor('files', 20, {
+      dest: storeUploadFile,
+      storage,
+    }),
+  )
+  uploadLargerFile(@UploadedFiles() files: Express.Multer.File[], @Body() body: { name: string }) {
+    // Step 1: Initial
+    const fileName = body.name.match(/(.+)-\d+$/)?.[1] ?? body.name; // In request client
+    const chuckDirPath = `${storeUploadFile}/chuck-${fileName}`;
+    const filePath = files[0].path;
+
+    // Step 2: Create a new folder to contain chuck files, if it not exist
+    if (!fs.existsSync(chuckDirPath)) fs.mkdirSync(chuckDirPath);
+
+    // Step 3: Copy/Add chuck files into the chuck's folder
+    fs.copyFileSync(filePath, `${chuckDirPath}/${body.name}`);
+    fs.rmSync(filePath);
+  }
+
+  @Get('merge/file')
+  mergerFile(@Query('fileName') fileName: string) {
+    const chuckDirPath = `${storeUploadFile}/chuck-${fileName}`;
+    try {
+      const files = fs.readdirSync(chuckDirPath);
+      let startPosition = 0;
+      let countFile = 0;
+      const fileMergedPath = `${storeUploadFile}/merge/${fileName}`;
+
+      if (!fs.existsSync(`${storeUploadFile}/merge`)) {
+        fs.mkdirSync(`${storeUploadFile}/merge`);
+      }
+
+      files.forEach((file) => {
+        const filePath = `${chuckDirPath}/${file}`;
+        const streamFile = fs.createReadStream(filePath);
+
+        streamFile
+          .pipe(
+            fs.createWriteStream(fileMergedPath, {
+              start: startPosition,
+            }),
+          )
+          .on('finish', () => {
+            countFile++;
+
+            if (countFile === files.length) {
+              fs.rmSync(chuckDirPath, {
+                recursive: true,
+              });
+            }
+          });
+        startPosition += fs.statSync(filePath).size;
+      });
+
+      return `http://localhost:3000/${fileMergedPath}`;
+    } catch (error) {
+      throw new BadRequestException('File not found');
+    }
   }
 }

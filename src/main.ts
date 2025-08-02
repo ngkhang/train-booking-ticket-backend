@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
-
+  app.enableCors(); // Enable to test upload file with frontend
   app.useStaticAssets(join(__dirname, `../${storeUploadFile}`), {
     prefix: `/${storeUploadFile}`,
   });

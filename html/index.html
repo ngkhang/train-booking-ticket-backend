@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo - Upload Large File</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <h1>Upload Large File</h1>
+  <input id="fileInput" type="file" multiple/>
+
+  <script>
+    const inputFile = document.querySelector('#fileInput');
+
+    // Set chunkSize
+    const chunkSize = 140 * 1024;  // 140kb
+
+    // Catch event onchange file input
+    inputFile.addEventListener('change', async function(event){
+      console.log('File input changed');
+      event.preventDefault();
+
+      const file = inputFile.files[0];
+      const fileSize = file.size;
+
+      let startPosition = 0;
+      const chunks = [];
+
+      while (startPosition < fileSize) {
+        const endPosition = startPosition + chunkSize;
+        const chunk = file.slice(startPosition, endPosition);
+
+        chunks.push(chunk);
+        startPosition = endPosition;
+      }
+
+      if (!chunks.length) return;
+
+      const chunkPromise = [];
+      const prefixIndex = Math.random().toString().slice(2,8);
+      const fileName =  `${prefixIndex}-${file.name}`;
+
+      chunks.map((chunk, index) => {
+        const data = new FormData();
+        const chunkFileName = `${fileName}-${index}`
+
+        data.set('name', chunkFileName);
+        data.append('files', chunk);
+
+        chunkPromise.push(axios.post('http://localhost:3000/user/upload/large-file', data));
+      })
+
+      await Promise.all(chunkPromise);
+      // const res = await axios.get(`http://localhost:3000/user/merge/file?fileName=${fileName}`);
+      // console.log("🚀 ~ res:", res)
+    })
+
+  </script>
+</body>
+</html>

@@ -16,10 +16,14 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { storage, storeUploadFile } from './oss';
 import * as path from 'path';
 import * as fs from 'fs';
+import { MyLoggerService } from 'src/logger/my-logger.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly logger: MyLoggerService,
+  ) {}
 
   @Post('register')
   register(@Body() registerUserDto: RegisterUserDto) {
@@ -28,6 +32,7 @@ export class UserController {
 
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
+    this.logger.log('Login', 'UserController');
     return this.userService.login(loginUserDto);
   }
 

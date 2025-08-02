@@ -1,7 +1,8 @@
 import { Injectable, LoggerService, LogLevel } from '@nestjs/common';
-import chalk from 'chalk';
 import * as dayjs from 'dayjs';
-import { createLogger, format, Logger, transports } from 'winston';
+import { createLogger, format, Logger } from 'winston';
+import 'winston-daily-rotate-file';
+import transportsInstance from './my-logger.config';
 
 @Injectable()
 export class MyLoggerService implements LoggerService {
@@ -15,26 +16,7 @@ export class MyLoggerService implements LoggerService {
           format: () => dayjs().format('YYYY/MM/DD hh:mm:ss A'),
         }),
       ),
-      transports: [
-        new transports.Console({
-          format: format.combine(
-            format.printf(({ level, message, context, timestamp }) => {
-              const appStr = chalk.green('[NEST]');
-              const formatContext =
-                context && typeof context === 'string' ? chalk.yellowBright(`[${String(context)}]`) : '';
-
-              return `${appStr} - ${timestamp as string} - ${level.toUpperCase()}: ${formatContext} ${message as string}`;
-            }),
-          ),
-        }),
-        new transports.File({
-          dirname: 'logs',
-          filename: 'info.log',
-          level: 'info',
-          maxsize: 10240, // 10KB
-          format: format.combine(format.json(), format.prettyPrint()),
-        }),
-      ],
+      transports: transportsInstance,
     });
   }
   log(message: string, context?: string) {
